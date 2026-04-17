@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cofit 提醒助手⏰</title>
+    <title>Cofit 網紅合作提醒助手⏰</title>
     <style>
         :root {
             --primary-color: #004f51; /* 主色調：墨綠色 */
-            --primary-hover: #006669; /* 按鈕懸停顏色 */
-            --bg-color: #f4f7f6;      /* 背景顏色 */
+            --primary-hover: #006669; 
+            --bg-color: #f4f7f6;      
             --text-color: #2c3e50;
             --border-color: #e0e0e0;
         }
@@ -21,10 +21,9 @@
         input, select, textarea { width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; box-sizing: border-box; font-size: 15px; transition: all 0.2s ease; background: #fff; }
         input:focus, select:focus { border-color: var(--primary-color); outline: none; box-shadow: 0 0 0 3px rgba(0, 79, 81, 0.08); }
         .extra-fields { background: #fbfcfc; padding: 25px; border-radius: 14px; margin-bottom: 22px; border: 1px solid #eee; }
-        textarea { height: 240px; background-color: #fff; margin-top: 18px; line-height: 1.7; border: 1px solid #eee; border-radius: 14px; font-family: inherit; font-size: 14px; resize: vertical; }
+        textarea { height: 280px; background-color: #fff; margin-top: 18px; line-height: 1.7; border: 1px solid #eee; border-radius: 14px; font-family: inherit; font-size: 14px; resize: vertical; }
         .btn-copy { background-color: var(--primary-color); color: white; border: none; padding: 18px; width: 100%; border-radius: 14px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; box-shadow: 0 5px 10px rgba(0, 79, 81, 0.15); margin-top: 15px; }
         .btn-copy:hover { background-color: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0, 79, 81, 0.2); }
-        .btn-copy:active { transform: translateY(0); box-shadow: 0 3px 6px rgba(0, 79, 81, 0.1); }
         #customDateWrap { display: none; margin-top: 12px; }
         .date-hint { font-size: 12px; color: #999; margin-top: 7px; margin-left: 2px; }
     </style>
@@ -41,7 +40,7 @@
 
     <div class="form-group">
         <label>語言選擇</label>
-        <select id="lang" onchange="generateText()">
+        <select id="lang" onchange="handleLangChange()">
             <option value="zh">中文 (繁體) - 台灣格式 (M/D)</option>
             <option value="yue">粵語 - 香港格式 (D/M)</option>
             <option value="en">English - International (D/M)</option>
@@ -51,6 +50,7 @@
     <div class="form-group">
         <label>提醒情境</label>
         <select id="scenario" onchange="handleScenarioChange()">
+            <option value="class_start">⭐ 新增：進班提醒</option>
             <option value="survey">填問卷</option>
             <option value="1v1">1v1 飲食分析</option>
             <option value="video">視訊指導</option>
@@ -68,6 +68,7 @@
         <select id="dateType" onchange="handleDateTypeChange()">
             <option value="today">今天</option>
             <option value="tomorrow">明天</option>
+            <option value="next_monday">下星期一 (自動計算)</option>
             <option value="custom">指定日期</option>
         </select>
         <div id="customDateWrap">
@@ -99,13 +100,14 @@
 
 <script>
     const langMap = {
-        zh: { today: "今天", tomorrow: "明天", dateFmt: "月/日" },
-        yue: { today: "今日", tomorrow: "聽日", dateFmt: "日/月" },
-        en: { today: "today", tomorrow: "tomorrow", dateFmt: "D/M" }
+        zh: { today: "今天", tomorrow: "明天", next_mon: "下星期一", dateFmt: "月/日" },
+        yue: { today: "今日", tomorrow: "聽日", next_mon: "下星期一", dateFmt: "日/月" },
+        en: { today: "today", tomorrow: "tomorrow", next_mon: "next Monday", dateFmt: "D/M" }
     };
 
     const templates = {
         zh: {
+            class_start: "下星期一（{date}）課程會正式開始，需要每天拍攝三餐食物照片並上傳至 Cofit App，營養師會提供每餐飲食建議，再依據營養師的建議調整飲食就 OK 啦！😃\n\n以下是合作 Brief，影片方向可參考：😊\nhttps://drive.google.com/file/d/1m5VVpfObbLc1ZuEQWeDyHcIxedkYRhq_/view\n>>> ❗重要文件，建議下載留存，內容需避開醫療用語\n\n📸 每週一更新與記錄身體數據：\n* 體重計數字（體重+腰圍是必備，如有體脂率數字會更好）\n⚠️ 注意事項：\n課程開始前請先拍下 Before 身形照（建議同一部位或穿同一套衣服比較明顯喔！）",
             survey: "和營養師分析之前，麻煩先完成以下2份問卷～🙏\n\n⚠️注意：必須用註冊App的同一支手機號碼填寫，這樣營養師才能找到 {name} 的問卷唷！⚠️\n\n1️⃣ 飲食生活基本問卷：https://client.cofit.me/survey?next=surveyForm&surveyCode=7CjycTjkDCCSsekQ \n2️⃣ 荷爾蒙分型問卷：https://genesis-client.cofit.me/surveyForm?surveyCode=uUQ0IVzyHtMnISNh\n\n有問題可以隨意提問喔！☀️😊",
             "1v1": "Hello {name}，提醒你 {date} {time} 預約了和營養師 {dt} 的一對一飲食分析，可以用這個連結進入會議室 👉 Google meet: {link} 💖",
             video: "Hello {name}，提醒你 {date} {time} 預約了和營養師 {dt} 的視訊指導，有任何問題可以把握今天問營養師喔！請用這個連結進入會議室 👉 Google meet: {link} 💖",
@@ -117,6 +119,7 @@
             ig: "請問 {name} 的 IG Story 準備好了嗎？發布前麻煩給我們看看～感謝！"
         },
         yue: {
+            class_start: "下星期一（{date}）課程會正式開始，需要每日影低3餐食物相upload上Cofit App，營養師會提供每餐飲食建議，再依據營養師嘅建議調整飲食就OK啦！😃\n\n以下係合作Brief，影片方向可參考：😊\nhttps://drive.google.com/file/d/1m5VVpfObbLc1ZuEQWeDyHcIxedkYRhq_/view\n>>> ❗重要文件，建議下載留存，需要避開醫療用語\n\n📸 每週一update+記錄身體數據：\n*體重計數字（體重+腰圍is a must，如有體脂率數字會更好）\n⚠️ 注意事項：\n課程開始前影低Before身形照（同一部位或同一套衣服）",
             survey: "同營養師線上分析之前，麻煩幫我哋先填好呢兩份問卷～🙏\n\n⚠️注意：必須用註冊App嘅同一隻手機號碼填寫，先可以搵到 {name} 嘅問卷⚠️\n\n1️⃣ 飲食生活基本問卷：https://client.cofit.me/survey?next=surveyForm&surveyCode=7CjycTjkDCCSsekQ \n2️⃣ 荷爾蒙分型問卷：https://genesis-client.cofit.me/surveyForm?surveyCode=uUQ0IVzyHtMnISNh\n\n有問題可以隨意問我哋！☀️😊",
             "1v1": "Hello {name}！提提你 {date} {time} 預約咗同營養師 {dt} 嘅一對一飲食分析，可以用呢條 link 進入會議室 👉 Google meet: {link} 💖",
             video: "Hello {name}！提提你 {date} {time} 預約咗同營養師 {dt} 嘅視訊指導，有任何問題可以把握今日時間問營養師！請用呢條 link 進入會議室 👉 Google meet: {link} 💖",
@@ -128,6 +131,7 @@
             ig: "請問 {name} 嘅 IG Story 準備好未呀？發布之前麻煩比我哋睇睇先～唔該！"
         },
         en: {
+            class_start: "The program will officially start next Monday ({date}). You will need to take photos of your three meals daily and upload them to the Cofit App. Your nutritionist will provide dietary suggestions for each meal—just adjust your diet based on their advice and you'll be all set! 😃\n\nHere is the Collaboration Brief for your reference regarding the video direction: 😊\nhttps://drive.google.com/file/d/1OKU8G2LaHYjKpq0YdnuT42MZL0RbZpA9/view\n>>> ❗Important document, please download and save. Please avoid using medical terminology in the content.\n\n📸 Weekly Update (Every Monday) - Body Data Tracking:\n* Body weight scale numbers (Weight + Waist circumference is a must; body fat percentage is optional but preferred)\n⚠️ Note:\nPlease take 'Before' body photos (same angle or same outfit) before the program starts.",
             survey: "Before your consultation with the nutritionist, kindly complete the following two questionnaires 🙏\n\n⚠️ Important: Please make sure to fill them out using the same mobile phone number you used to register in the app, so the nutritionist can locate your questionnaires. ⚠️\n\n1️⃣ Health questionnaire: https://client.cofit.me/en/survey?next=surveyForm&surveyCode=vjwrif45YyPyoQGaK63G1wqE \n2️⃣ Hormone Type Questionnaire: https://client.cofit.me/en/survey?next=surveyForm&surveyCode=2i4Sg8UQW6kgmeZ2Sn1izyFc\n\nIf you have any questions, don’t hesitate to contact us! 😊",
             "1v1": "Hello {name}, this is a reminder for your 1-on-1 diet analysis with nutritionist {dt} {date} at {time}. You can join via 👉 Google meet: {link} 💖",
             video: "Hello {name}, reminding you of your video guidance session with nutritionist {dt} {date} at {time}. Join here 👉 Google meet: {link} 💖",
@@ -139,6 +143,10 @@
             ig: "Hi {name}, is the IG Story ready? Please let us have a look before you post it. Thank you!"
         }
     };
+
+    function handleLangChange() {
+        generateText();
+    }
 
     function handleDateTypeChange() {
         const type = document.getElementById('dateType').value;
@@ -153,6 +161,7 @@
         const fDt = document.getElementById('field-dietitian');
         const fLink = document.getElementById('field-link');
 
+        // 預設邏輯
         extra.style.display = "block";
         fTime.style.display = "none";
         fDt.style.display = "none";
@@ -164,11 +173,25 @@
             fLink.style.display = "block";
         } else if (sc === 'measure') {
             fTime.style.display = "block";
-        } else if (['survey', 'acopy', 'bcopy', 'final', 'ig', 'script'].includes(sc)) {
-            if (sc === 'survey' || sc === 'ig') extra.style.display = "none";
+        } else if (['class_start', 'survey', 'acopy', 'bcopy', 'final', 'ig', 'script'].includes(sc)) {
+            if (sc !== '1v1' && sc !== 'video' && sc !== 'measure') extra.style.display = "none";
         }
         
+        // 如果情境是進班提醒，預設日期選為「下星期一」
+        if (sc === 'class_start') {
+            document.getElementById('dateType').value = 'next_monday';
+            handleDateTypeChange();
+        }
+
         generateText();
+    }
+
+    function getNextMonday() {
+        const d = new Date();
+        const day = d.getDay(); // 0 是週日, 1 是週一
+        const diff = (day === 0 ? 1 : 8 - day); // 如果今天是週日，加1天；否則加到下週一
+        d.setDate(d.getDate() + diff);
+        return d;
     }
 
     function getDateString() {
@@ -176,12 +199,19 @@
         const lang = document.getElementById('lang').value;
         document.getElementById('formatHint').innerText = "當前日期格式：" + langMap[lang].dateFmt;
 
-        if (type === 'today') return langMap[lang].today;
-        if (type === 'tomorrow') return langMap[lang].tomorrow;
-        
-        const val = document.getElementById('customDate').value;
-        if (!val) return "[日期]";
-        const d = new Date(val);
+        let d;
+        if (type === 'today') {
+            return langMap[lang].today;
+        } else if (type === 'tomorrow') {
+            return langMap[lang].tomorrow;
+        } else if (type === 'next_monday') {
+            d = getNextMonday();
+        } else {
+            const val = document.getElementById('customDate').value;
+            if (!val) return "[日期]";
+            d = new Date(val);
+        }
+
         const month = d.getMonth() + 1;
         const day = d.getDate();
         return (lang === 'zh') ? (month + '/' + day) : (day + '/' + month);
