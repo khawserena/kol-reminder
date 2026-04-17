@@ -50,7 +50,7 @@
     <div class="form-group">
         <label>提醒情境</label>
         <select id="scenario" onchange="handleScenarioChange()">
-            <option value="class_start">⭐ 新增：進班提醒</option>
+            <option value="class_start">⭐ 進班提醒</option>
             <option value="survey">填問卷</option>
             <option value="1v1">1v1 飲食分析</option>
             <option value="video">視訊指導</option>
@@ -107,10 +107,10 @@
 
     const templates = {
         zh: {
-            class_start: "下星期一（{date}）課程會正式開始，需要每天拍攝三餐食物照片並上傳至 Cofit App，營養師會提供每餐飲食建議，再依據營養師的建議調整飲食就 OK 啦！😃\n\n以下是合作 Brief，影片方向可參考：😊\nhttps://drive.google.com/file/d/1m5VVpfObbLc1ZuEQWeDyHcIxedkYRhq_/view\n>>> ❗重要文件，建議下載留存，內容需避開醫療用語\n\n📸 每週一更新與記錄身體數據：\n* 體重計數字（體重+腰圍是必備，如有體脂率數字會更好）\n⚠️ 注意事項：\n課程開始前請先拍下 Before 身形照（建議同一部位或穿同一套衣服比較明顯喔！）",
-            survey: "和營養師分析之前，麻煩先完成以下2份問卷～🙏\n\n⚠️注意：必須用註冊App的同一支手機號碼填寫，這樣營養師才能找到 {name} 的問卷唷！⚠️\n\n1️⃣ 飲食生活基本問卷：https://client.cofit.me/survey?next=surveyForm&surveyCode=7CjycTjkDCCSsekQ \n2️⃣ 荷爾蒙分型問卷：https://genesis-client.cofit.me/surveyForm?surveyCode=uUQ0IVzyHtMnISNh\n\n有問題可以隨意提問喔！☀️😊",
-            "1v1": "Hello {name}，提醒你 {date} {time} 預約了和營養師 {dt} 的一對一飲食分析，可以用這個連結進入會議室 👉 Google meet: {link} 💖",
-            video: "Hello {name}，提醒你 {date} {time} 預約了和營養師 {dt} 的視訊指導，有任何問題可以把握今天問營養師喔！請用這個連結進入會議室 👉 Google meet: {link} 💖",
+            class_start: "Hello {name}，下星期一（{date}）課程會正式開始，需要每天拍攝三餐食物照片並上傳至 Cofit App，營養師會提供每餐飲食建議，再依據營養師的建議調整飲食就 OK 啦！😃\n\n以下是合作 Brief，影片方向可參考：😊\nhttps://drive.google.com/file/d/1m5VVpfObbLc1ZuEQWeDyHcIxedkYRhq_/view\n>>> ❗重要文件，建議下載留存，內容需避開醫療用語\n\n📸 每週一更新與記錄身體數據：\n* 體重計數字（體重+腰圍是必備，如有體脂率數字會更好）\n⚠️ 注意事項：\n課程開始前請先拍下 Before 身形照（建議同一部位或穿同一套衣服比較明顯喔！）",
+            survey: "Hello {name}，和營養師分析之前，麻煩先完成以下2份問卷～🙏\n\n⚠️注意：必須用註冊App的同一支手機號碼填寫，這樣營養師才能找到 {name} 的問卷唷！⚠️\n\n1️⃣ 飲食生活基本問卷：https://client.cofit.me/survey?next=surveyForm&surveyCode=7CjycTjkDCCSsekQ \n2️⃣ 荷爾蒙分型問卷：https://genesis-client.cofit.me/surveyForm?surveyCode=uUQ0IVzyHtMnISNh\n\n有問題可以隨意提問喔！☀️😊",
+            "1v1": "Hello {name}, this is a reminder for your 1-on-1 consultation with nutritionist {dt} {date} at {time}. You can join via 👉 Google meet: {link} 💖",
+            video: "Hello {name}, reminding you of your video guidance session with nutritionist {dt} {date} at {time}. Join here 👉 Google meet: {link} 💖",
             measure: "Hello {name}，幫你預約了 {date} {time} 做 InBody 量測～\n地點是：中環士丹利街50號 信誠廣場21樓C室\n\n因個資問題，如果有需要拍攝量測過程，請儘量避免拍到合作中心 Logo 或工作人員就 OK 啦！☺️\n做完量測之後，麻煩用 App 裡面的「AI InBody」功能上傳報告，這樣營養師就可以看到你的結果了！😃",
             script: "提醒 {name}，{date} 需要提交腳本（video flow）喔！辛苦了～",
             acopy: "提醒 {name}，{date} 需要麻煩你提供 A copy（含字幕）喔！謝謝你，辛苦了！",
@@ -119,8 +119,8 @@
             ig: "請問 {name} 的 IG Story 準備好了嗎？發布前麻煩給我們看看～感謝！"
         },
         yue: {
-            class_start: "下星期一（{date}）課程會正式開始，需要每日影低3餐食物相upload上Cofit App，營養師會提供每餐飲食建議，再依據營養師嘅建議調整飲食就OK啦！😃\n\n以下係合作Brief，影片方向可參考：😊\nhttps://drive.google.com/file/d/1m5VVpfObbLc1ZuEQWeDyHcIxedkYRhq_/view\n>>> ❗重要文件，建議下載留存，需要避開醫療用語\n\n📸 每週一update+記錄身體數據：\n*體重計數字（體重+腰圍is a must，如有體脂率數字會更好）\n⚠️ 注意事項：\n課程開始前影低Before身形照（同一部位或同一套衣服）",
-            survey: "同營養師線上分析之前，麻煩幫我哋先填好呢兩份問卷～🙏\n\n⚠️注意：必須用註冊App嘅同一隻手機號碼填寫，先可以搵到 {name} 嘅問卷⚠️\n\n1️⃣ 飲食生活基本問卷：https://client.cofit.me/survey?next=surveyForm&surveyCode=7CjycTjkDCCSsekQ \n2️⃣ 荷爾蒙分型問卷：https://genesis-client.cofit.me/surveyForm?surveyCode=uUQ0IVzyHtMnISNh\n\n有問題可以隨意問我哋！☀️😊",
+            class_start: "Hello {name}，下星期一（{date}）課程會正式開始，需要每日影低3餐食物相upload上Cofit App，營養師會提供每餐飲食建議，再依據營養師嘅建議調整飲食就OK啦！😃\n\n以下係合作Brief，影片方向可參考：😊\nhttps://drive.google.com/file/d/1m5VVpfObbLc1ZuEQWeDyHcIxedkYRhq_/view\n>>> ❗重要文件，建議下載留存，需要避開醫療用語\n\n📸 每週一update+記錄身體數據：\n*體重計數字（體重+腰圍is a must，如有體脂率數字會更好）\n⚠️ 注意事項：\n課程開始前影低Before身形照（同一部位或同一套衣服）",
+            survey: "Hello {name}，同營養師線上分析之前，麻煩幫我哋先填好呢兩份問卷～🙏\n\n⚠️注意：必須用註冊App嘅同一隻手機號碼填寫，先可以搵到 {name} 嘅問卷⚠️\n\n1️⃣ 飲食生活基本問卷：https://client.cofit.me/survey?next=surveyForm&surveyCode=7CjycTjkDCCSsekQ \n2️⃣ 荷爾蒙分型問卷：https://genesis-client.cofit.me/surveyForm?surveyCode=uUQ0IVzyHtMnISNh\n\n有問題可以隨意問我哋！☀️😊",
             "1v1": "Hello {name}！提提你 {date} {time} 預約咗同營養師 {dt} 嘅一對一飲食分析，可以用呢條 link 進入會議室 👉 Google meet: {link} 💖",
             video: "Hello {name}！提提你 {date} {time} 預約咗同營養師 {dt} 嘅視訊指導，有任何問題可以把握今日時間問營養師！請用呢條 link 進入會議室 👉 Google meet: {link} 💖",
             measure: "Hello {name}，我幫你約咗 {date} {time} 做 InBody 量測～\n地點係：中環士丹利街50號 信誠廣場21樓C室\n\n因個資問題，如果有需要拍攝量測過程，儘量避免影到合作中心 logo、工作人員就 OK 啦！☺️\n做完量測之後，麻煩用 App 裡面嘅「AI inbody」功能影低，咁營養師就可以睇到你嘅報告啦！😃",
@@ -131,8 +131,8 @@
             ig: "請問 {name} 嘅 IG Story 準備好未呀？發布之前麻煩比我哋睇睇先～唔該！"
         },
         en: {
-            class_start: "The program will officially start next Monday ({date}). You will need to take photos of your three meals daily and upload them to the Cofit App. Your nutritionist will provide dietary suggestions for each meal—just adjust your diet based on their advice and you'll be all set! 😃\n\nHere is the Collaboration Brief for your reference regarding the video direction: 😊\nhttps://drive.google.com/file/d/1OKU8G2LaHYjKpq0YdnuT42MZL0RbZpA9/view\n>>> ❗Important document, please download and save. Please avoid using medical terminology in the content.\n\n📸 Weekly Update (Every Monday) - Body Data Tracking:\n* Body weight scale numbers (Weight + Waist circumference is a must; body fat percentage is optional but preferred)\n⚠️ Note:\nPlease take 'Before' body photos (same angle or same outfit) before the program starts.",
-            survey: "Before your consultation with the nutritionist, kindly complete the following two questionnaires 🙏\n\n⚠️ Important: Please make sure to fill them out using the same mobile phone number you used to register in the app, so the nutritionist can locate your questionnaires. ⚠️\n\n1️⃣ Health questionnaire: https://client.cofit.me/en/survey?next=surveyForm&surveyCode=vjwrif45YyPyoQGaK63G1wqE \n2️⃣ Hormone Type Questionnaire: https://client.cofit.me/en/survey?next=surveyForm&surveyCode=2i4Sg8UQW6kgmeZ2Sn1izyFc\n\nIf you have any questions, don’t hesitate to contact us! 😊",
+            class_start: "Hello {name}, the program will officially start next Monday ({date}). You will need to take photos of your three meals daily and upload them to the Cofit App. Your nutritionist will provide dietary suggestions for each meal—just adjust your diet based on their advice and you'll be all set! 😃\n\nHere is the Collaboration Brief for your reference regarding the video direction: 😊\nhttps://drive.google.com/file/d/1OKU8G2LaHYjKpq0YdnuT42MZL0RbZpA9/view\n>>> ❗Important document, please download and save. Please avoid using medical terminology in the content.\n\n📸 Weekly Update (Every Monday) - Body Data Tracking:\n* Body weight scale numbers (Weight + Waist circumference is a must; body fat percentage is optional but preferred)\n⚠️ Note:\nPlease take 'Before' body photos (same angle or same outfit) before the program starts.",
+            survey: "Hello {name}, before your consultation with the nutritionist, kindly complete the following two questionnaires 🙏\n\n⚠️ Important: Please make sure to fill them out using the same mobile phone number you used to register in the app, so the nutritionist can locate your questionnaires. ⚠️\n\n1️⃣ Health questionnaire: https://client.cofit.me/en/survey?next=surveyForm&surveyCode=vjwrif45YyPyoQGaK63G1wqE \n2️⃣ Hormone Type Questionnaire: https://client.cofit.me/en/survey?next=surveyForm&surveyCode=2i4Sg8UQW6kgmeZ2Sn1izyFc\n\nIf you have any questions, don’t hesitate to contact us! 😊",
             "1v1": "Hello {name}, this is a reminder for your 1-on-1 consultation with nutritionist {dt} {date} at {time}. You can join via 👉 Google meet: {link} 💖",
             video: "Hello {name}, reminding you of your video guidance session with nutritionist {dt} {date} at {time}. Join here 👉 Google meet: {link} 💖",
             measure: "Hi {name}, I've scheduled an InBody measurement for you {date} at {time}.\nLocation: Unit C, 21/F, Prosperous Building, 50 Stanley Street, Central.\n\nOnce finished, please upload the results using the 'AI InBody' feature in the app! 😃",
@@ -161,7 +161,6 @@
         const fDt = document.getElementById('field-dietitian');
         const fLink = document.getElementById('field-link');
 
-        // 預設邏輯
         extra.style.display = "block";
         fTime.style.display = "none";
         fDt.style.display = "none";
@@ -177,7 +176,6 @@
             if (sc !== '1v1' && sc !== 'video' && sc !== 'measure') extra.style.display = "none";
         }
         
-        // 如果情境是進班提醒，預設日期選為「下星期一」
         if (sc === 'class_start') {
             document.getElementById('dateType').value = 'next_monday';
             handleDateTypeChange();
@@ -188,8 +186,8 @@
 
     function getNextMonday() {
         const d = new Date();
-        const day = d.getDay(); // 0 是週日, 1 是週一
-        const diff = (day === 0 ? 1 : 8 - day); // 如果今天是週日，加1天；否則加到下週一
+        const day = d.getDay(); 
+        const diff = (day === 0 ? 1 : 8 - day); 
         d.setDate(d.getDate() + diff);
         return d;
     }
