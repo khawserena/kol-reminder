@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cofit 提醒助手⏰</title>
+    <style>
+        :root {
+            --primary-color: #004f51; /* 主色調：墨綠色 */
+            --primary-hover: #006669; /* 按鈕懸停顏色 */
+            --bg-color: #f4f7f6;      /* 背景顏色 */
+            --text-color: #2c3e50;
+            --border-color: #e0e0e0;
+        }
+
+        body { font-family: -apple-system, "SF Pro Display", "Segoe UI", sans-serif; background-color: var(--bg-color); padding: 20px; display: flex; justify-content: center; color: var(--text-color); }
+        .container { background: white; padding: 35px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.03); width: 100%; max-width: 650px; }
+        h2 { color: var(--primary-color); text-align: center; margin-bottom: 30px; font-weight: 800; letter-spacing: 1px; font-size: 24px; }
+        .form-group { margin-bottom: 22px; }
+        label { display: block; margin-bottom: 9px; font-weight: 600; color: var(--text-color); font-size: 14px; opacity: 0.9; }
+        input, select, textarea { width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; box-sizing: border-box; font-size: 15px; transition: all 0.2s ease; background: #fff; }
+        input:focus, select:focus { border-color: var(--primary-color); outline: none; box-shadow: 0 0 0 3px rgba(0, 79, 81, 0.08); }
+        .extra-fields { background: #fbfcfc; padding: 25px; border-radius: 14px; margin-bottom: 22px; border: 1px solid #eee; }
+        textarea { height: 240px; background-color: #fff; margin-top: 18px; line-height: 1.7; border: 1px solid #eee; border-radius: 14px; font-family: inherit; font-size: 14px; resize: vertical; }
+        .btn-copy { background-color: var(--primary-color); color: white; border: none; padding: 18px; width: 100%; border-radius: 14px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; box-shadow: 0 5px 10px rgba(0, 79, 81, 0.15); margin-top: 15px; }
+        .btn-copy:hover { background-color: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0, 79, 81, 0.2); }
+        .btn-copy:active { transform: translateY(0); box-shadow: 0 3px 6px rgba(0, 79, 81, 0.1); }
+        #customDateWrap { display: none; margin-top: 12px; }
+        .date-hint { font-size: 12px; color: #999; margin-top: 7px; margin-left: 2px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Cofit 網紅合作提醒助手⏰</h2>
+    
+    <div class="form-group">
+        <label>網紅名稱</label>
+        <input type="text" id="kolName" placeholder="請輸入網紅名稱" oninput="generateText()">
+    </div>
+
+    <div class="form-group">
+        <label>語言選擇</label>
+        <select id="lang" onchange="generateText()">
+            <option value="zh">中文 (繁體) - 台灣格式 (M/D)</option>
+            <option value="yue">粵語 - 香港格式 (D/M)</option>
+            <option value="en">English - International (D/M)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>提醒情境</label>
+        <select id="scenario" onchange="handleScenarioChange()">
+            <option value="survey">填問卷</option>
+            <option value="1v1">1v1 飲食分析</option>
+            <option value="video">視訊指導</option>
+            <option value="measure">量測 (InBody)</option>
+            <option value="script">交腳本</option>
+            <option value="acopy">交 A copy (含字幕)</option>
+            <option value="bcopy">交 B copy</option>
+            <option value="final">交 Final</option>
+            <option value="ig">IG Story</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>日期設定</label>
+        <select id="dateType" onchange="handleDateTypeChange()">
+            <option value="today">今天</option>
+            <option value="tomorrow">明天</option>
+            <option value="custom">指定日期</option>
+        </select>
+        <div id="customDateWrap">
+            <input type="date" id="customDate" onchange="generateText()">
+        </div>
+        <div id="formatHint" class="date-hint">當前日期格式：月/日</div>
+    </div>
+
+    <div id="extraFields" class="extra-fields" style="display:none;">
+        <div id="field-time" class="form-group">
+            <label>具體時間</label>
+            <input type="text" id="timeOnly" placeholder="例如：14:00" oninput="generateText()">
+        </div>
+        <div id="field-dietitian" class="form-group">
+            <label>營養師名稱</label>
+            <input type="text" id="dietitian" placeholder="例如：瑋如" oninput="generateText()">
+        </div>
+        <div id="field-link" class="form-group">
+            <label>Google Meet 連結</label>
+            <input type="text" id="meetLink" placeholder="貼上連結" oninput="generateText()">
+        </div>
+    </div>
+
+    <label>產生結果：</label>
+    <textarea id="resultText" readonly></textarea>
+    
+    <button class="btn-copy" onclick="copyText()">複製文字內容</button>
+</div>
+
+<script>
+    const langMap = {
+        zh: { today: "今天", tomorrow: "明天", dateFmt: "月/日" },
+        yue: { today: "今日", tomorrow: "聽日", dateFmt: "日/月" },
+        en: { today: "today", tomorrow: "tomorrow", dateFmt: "D/M" }
+    };
+
+    const templates = {
+        zh: {
+            survey: "和營養師分析之前，麻煩先完成以下2份問卷～🙏\n\n⚠️注意：必須用註冊App的同一支手機號碼填寫，這樣營養師才能找到 {name} 的問卷唷！⚠️\n\n1️⃣ 飲食生活基本問卷：https://client.cofit.me/survey?next=surveyForm&surveyCode=7CjycTjkDCCSsekQ \n2️⃣ 荷爾蒙分型問卷：https://genesis-client.cofit.me/surveyForm?surveyCode=uUQ0IVzyHtMnISNh\n\n有問題可以隨意提問喔！☀️😊",
+            "1v1": "Hello {name}，提醒你 {date} {time} 預約了和營養師 {dt} 的一對一飲食分析，可以用這個連結進入會議室 👉 Google meet: {link} 💖",
+            video: "Hello {name}，提醒你 {date} {time} 預約了和營養師 {dt} 的視訊指導，有任何問題可以把握今天問營養師喔！請用這個連結進入會議室 👉 Google meet: {link} 💖",
+            measure: "Hello {name}，幫你預約了 {date} {time} 做 InBody 量測～\n地點是：中環士丹利街50號 信誠廣場21樓C室\n\n因個資問題，如果有需要拍攝量測過程，請儘量避免拍到合作中心 Logo 或工作人員就 OK 啦！☺️\n做完量測之後，麻煩用 App 裡面的「AI InBody」功能上傳報告，這樣營養師就可以看到你的結果了！😃",
+            script: "提醒 {name}，{date} 需要提交腳本（video flow）喔！辛苦了～",
+            acopy: "提醒 {name}，{date} 需要麻煩你提供 A copy（含字幕）喔！謝謝你，辛苦了！",
+            bcopy: "提醒 {name}，{date} 需要麻煩你提供 B copy 喔！謝謝你，辛苦了！",
+            final: "影片上線前，麻煩 {name} 讓我們先看一遍 {date} 的 Final 喔！謝謝你的配合 ✨",
+            ig: "請問 {name} 的 IG Story 準備好了嗎？發布前麻煩給我們看看～感謝！"
+        },
+        yue: {
+            survey: "同營養師線上分析之前，麻煩幫我哋先填好呢兩份問卷～🙏\n\n⚠️注意：必須用註冊App嘅同一隻手機號碼填寫，先可以搵到 {name} 嘅問卷⚠️\n\n1️⃣ 飲食生活基本問卷：https://client.cofit.me/survey?next=surveyForm&surveyCode=7CjycTjkDCCSsekQ \n2️⃣ 荷爾蒙分型問卷：https://genesis-client.cofit.me/surveyForm?surveyCode=uUQ0IVzyHtMnISNh\n\n有問題可以隨意問我哋！☀️😊",
+            "1v1": "Hello {name}！提提你 {date} {time} 預約咗同營養師 {dt} 嘅一對一飲食分析，可以用呢條 link 進入會議室 👉 Google meet: {link} 💖",
+            video: "Hello {name}！提提你 {date} {time} 預約咗同營養師 {dt} 嘅視訊指導，有任何問題可以把握今日時間問營養師！請用呢條 link 進入會議室 👉 Google meet: {link} 💖",
+            measure: "Hello {name}，我幫你約咗 {date} {time} 做 InBody 量測～\n地點係：中環士丹利街50號 信誠廣場21樓C室\n\n因個資問題，如果有需要拍攝量測過程，儘量避免影到合作中心 logo、工作人員就 OK 啦！☺️\n做完量測之後，麻煩用 App 裡面嘅「AI inbody」功能影低，咁營養師就可以睇到你嘅報告啦！😃",
+            script: "提提 {name}，{date} 需要交出版嘅腳本 (video flow) 喇！辛苦晒～",
+            acopy: "提醒你，{date} 要麻煩你交 A copy (連字幕) 喇！辛苦晒你！",
+            bcopy: "提醒你，{date} 要麻煩你交 B copy 喇！唔該晒你，辛苦晒！",
+            final: "喺影片上線之前，麻煩 {name} 喺 {date} 比我哋睇多次個 Final version 呀！唔該晒！",
+            ig: "請問 {name} 嘅 IG Story 準備好未呀？發布之前麻煩比我哋睇睇先～唔該！"
+        },
+        en: {
+            survey: "Before your consultation with the nutritionist, kindly complete the following two questionnaires 🙏\n\n⚠️ Important: Please make sure to fill them out using the same mobile phone number you used to register in the app, so the nutritionist can locate your questionnaires. ⚠️\n\n1️⃣ Health questionnaire: https://client.cofit.me/en/survey?next=surveyForm&surveyCode=vjwrif45YyPyoQGaK63G1wqE \n2️⃣ Hormone Type Questionnaire: https://client.cofit.me/en/survey?next=surveyForm&surveyCode=2i4Sg8UQW6kgmeZ2Sn1izyFc\n\nIf you have any questions, don’t hesitate to contact us! 😊",
+            "1v1": "Hello {name}, this is a reminder for your 1-on-1 diet analysis with nutritionist {dt} {date} at {time}. You can join via 👉 Google meet: {link} 💖",
+            video: "Hello {name}, reminding you of your video guidance session with nutritionist {dt} {date} at {time}. Join here 👉 Google meet: {link} 💖",
+            measure: "Hi {name}, I've scheduled an InBody measurement for you {date} at {time}.\nLocation: Unit C, 21/F, Prosperous Building, 50 Stanley Street, Central.\n\nOnce finished, please upload the results using the 'AI InBody' feature in the app! 😃",
+            script: "Hi {name}, just a friendly reminder that the script is due {date}. Thank you!",
+            acopy: "Hi {name}, the A copy (with subtitles) is due {date}. Thank you!",
+            bcopy: "Hi {name}, the B copy is due {date}. Thank you!",
+            final: "Hi {name}, could you please provide the final version for us to review {date} before it goes live? Thanks!",
+            ig: "Hi {name}, is the IG Story ready? Please let us have a look before you post it. Thank you!"
+        }
+    };
+
+    function handleDateTypeChange() {
+        const type = document.getElementById('dateType').value;
+        document.getElementById('customDateWrap').style.display = (type === 'custom') ? 'block' : 'none';
+        generateText();
+    }
+
+    function handleScenarioChange() {
+        const sc = document.getElementById('scenario').value;
+        const extra = document.getElementById('extraFields');
+        const fTime = document.getElementById('field-time');
+        const fDt = document.getElementById('field-dietitian');
+        const fLink = document.getElementById('field-link');
+
+        extra.style.display = "block";
+        fTime.style.display = "none";
+        fDt.style.display = "none";
+        fLink.style.display = "none";
+
+        if (sc === '1v1' || sc === 'video') {
+            fTime.style.display = "block";
+            fDt.style.display = "block";
+            fLink.style.display = "block";
+        } else if (sc === 'measure') {
+            fTime.style.display = "block";
+        } else if (['survey', 'acopy', 'bcopy', 'final', 'ig', 'script'].includes(sc)) {
+            if (sc === 'survey' || sc === 'ig') extra.style.display = "none";
+        }
+        
+        generateText();
+    }
+
+    function getDateString() {
+        const type = document.getElementById('dateType').value;
+        const lang = document.getElementById('lang').value;
+        document.getElementById('formatHint').innerText = "當前日期格式：" + langMap[lang].dateFmt;
+
+        if (type === 'today') return langMap[lang].today;
+        if (type === 'tomorrow') return langMap[lang].tomorrow;
+        
+        const val = document.getElementById('customDate').value;
+        if (!val) return "[日期]";
+        const d = new Date(val);
+        const month = d.getMonth() + 1;
+        const day = d.getDate();
+        return (lang === 'zh') ? (month + '/' + day) : (day + '/' + month);
+    }
+
+    function generateText() {
+        const name = document.getElementById('kolName').value || "[網紅名稱]";
+        const lang = document.getElementById('lang').value;
+        const sc = document.getElementById('scenario').value;
+        const time = document.getElementById('timeOnly').value || "[時間]";
+        const dt = document.getElementById('dietitian').value || "[營養師]";
+        const link = document.getElementById('meetLink').value || "[連結]";
+        const dateStr = getDateString();
+
+        let text = templates[lang][sc];
+        
+        text = text.split('{name}').join(name)
+                   .split('{date}').join(dateStr)
+                   .split('{time}').join(time)
+                   .split('{dt}').join(dt)
+                   .split('{link}').join(link);
+
+        document.getElementById('resultText').value = text;
+    }
+
+    function copyText() {
+        const resultText = document.getElementById('resultText');
+        resultText.select();
+        document.execCommand('copy');
+        alert('✅ 已成功複製到剪貼簿！');
+    }
+
+    document.getElementById('customDate').valueAsDate = new Date();
+    handleScenarioChange();
+</script>
+
+</body>
+</html>
