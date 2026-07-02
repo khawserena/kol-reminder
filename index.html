@@ -50,8 +50,8 @@
     <div class="form-group">
         <label>提醒情境</label>
         <select id="scenario" onchange="handleScenarioChange()">
-            <option value="class_start">⭐ 進班提醒</option>
-            <option value="payment_proof">⭐ 新增：給匯款證明</option>
+            <option value="class_start">進班提醒</option>
+            <option value="payment_proof">给匯款證明</option>
             <option value="survey">填問卷</option>
             <option value="1v1">1v1 飲食分析</option>
             <option value="video">視訊指導</option>
@@ -61,6 +61,14 @@
             <option value="bcopy">交 B copy</option>
             <option value="final">交 Final</option>
             <option value="ig">IG Story</option>
+        </select>
+    </div>
+
+    <div id="locationGroup" class="form-group" style="display: none;">
+        <label>量測地點 (InBody)</label>
+        <select id="measureLocation" onchange="generateText()">
+            <option value="sheung_wan">上環 (預設)</option>
+            <option value="central">中環 (Greenutss 營養中心)</option>
         </select>
     </div>
 
@@ -106,6 +114,20 @@
         en: { today: "today", tomorrow: "tomorrow", next_mon: "next Monday", dateFmt: "D/M" }
     };
 
+    // 地址改回純地址文字
+    const addressMap = {
+        sheung_wan: {
+            zh: "上環德輔道中287-291號長達大廈18樓1801室",
+            yue: "上環德輔道中287-291號長達大廈18樓1801室",
+            en: "Rm1801, 18/F, Champion Building, 287-291 Des Voeux Road Central, Sheung Wan"
+        },
+        central: {
+            zh: "中環士丹利街50號 信誠廣場21樓C室",
+            yue: "中環士丹利街50號 信誠廣場21樓C室",
+            en: "Rm C, 21/F, World Trust Tower, 50 Stanley Street, Central"
+        }
+    };
+
     const templates = {
         zh: {
             class_start: "Hello {name}，下星期一（{date}）課程會正式開始，需要每天拍攝三餐食物照片並上傳至 Cofit App，營養師會提供每餐飲食建議，再依據營養師的建議調整飲食就 OK 啦！😃\n\n以下是合作 Brief，影片方向可參考：😊\nhttps://drive.google.com/file/d/1eQWj2yc-7DYZSugBUHsnzUluYfL3x7mA/view\n>>> ❗重要文件，建議下載留存，內容需避開醫療用語\n\n📸 每週一更新與記錄身體數據：\n* 體重計數字（體重+腰圍是必備，如有體脂率數字會更好）\n⚠️ 注意事項：\n課程開始前請先拍下 Before 身形照（建議同一部位或穿同一套衣服比較明顯喔！）",
@@ -113,8 +135,8 @@
             survey: "Hello {name}，和營養師分析之前，麻煩先完成以下2份問卷～🙏\n\n⚠️注意：必須用註冊App的同一支手機號碼填寫，這樣營養師才能找到 {name} 的問卷唷！⚠️\n\n1️⃣ 飲食生活基本問卷：https://client.cofit.me/survey?next=surveyForm&surveyCode=7CjycTjkDCCSsekQ \n2️⃣ 荷爾蒙分型問卷：https://genesis-client.cofit.me/surveyForm?surveyCode=uUQ0IVzyHtMnISNh\n\n開課前有任何問題都可以隨意提問喔！☀️😊",
             "1v1": "Hello {name}, this is a reminder for your 1-on-1 consultation with nutritionist {dt} {date} at {time}. You can join via 👉 Google meet: {link} 💖",
             video: "Hello {name}，提醒你 {date} {time} 預約了和營養師 {dt} 的視訊指導，有任何問題可以把握今天問營養師喔！請用這個連結進入會議室 👉 Google meet: {link} 💖",
-            measure: "Hello {name}，幫你預約了 {date} {time} 做 InBody 量測～\n地點是：中環士丹利街50號 信誠廣場21樓C室\n\n因個資問題，如果有需要拍攝量測過程，請儘量避免拍到合作中心 Logo 或工作人員就 OK 啦！☺️\n做完量測之後，麻煩用 App 裡面的「AI InBody」功能上傳報告，這樣營養師就可以看到你的結果了！😃",
-            script: "提醒 {name}，{date} 需要麻煩你提供初版腳本（video flow）喔！辛苦了～",
+            measure: "Hello {name}，幫你預約了 {date} {time} 做 InBody 量測～\n地點是：{address}\n\n因個資問題，如果有需要拍攝量測過程，請儘量避免拍到合作中心 Logo 或工作人員就 OK 啦！☺️\n做完量測之後，麻煩用 App 裡面的「AI InBody」功能上傳報告，這樣營養師就可以看到你的結果了！😃",
+            script: "提醒 {name}，{date} 需要提交腳本（video flow）喔！辛苦了～",
             acopy: "提醒 {name}，{date} 需要麻煩你提供 A copy（含字幕）喔！謝謝你，辛苦了！",
             bcopy: "提醒 {name}，{date} 需要麻煩你提供 B copy 喔！謝謝你，辛苦了！",
             final: "影片上線前，麻煩 {name} 讓我們先看一遍 {date} 的 Final 喔！謝謝你的配合 ✨",
@@ -126,10 +148,10 @@
             survey: "Hello {name}，同營養師線上分析之前，麻煩幫我哋先填好呢兩份問卷～🙏\n\n⚠️注意：必須用註冊App嘅同一隻手機號碼填寫，先可以搵到 {name} 嘅問卷⚠️\n\n1️⃣ 飲食生活基本問卷：https://client.cofit.me/survey?next=surveyForm&surveyCode=7CjycTjkDCCSsekQ \n2️⃣ 荷爾蒙分型問卷：https://genesis-client.cofit.me/surveyForm?surveyCode=uUQ0IVzyHtMnISNh\n\n有問題可以隨意問我哋！☀️😊",
             "1v1": "Hello {name}！提提你 {date} {time} 預約咗同營養師 {dt} 嘅一對一飲食分析，可以用呢條 link 進入會議室 👉 Google meet: {link} 💖",
             video: "Hello {name}！提提你 {date} {time} 預約咗同營養師 {dt} 嘅視訊指導，有任何問題可以把握今日時間問營養師！請用呢條 link 進入會議室 👉 Google meet: {link} 💖",
-            measure: "Hello {name}，我幫你約咗 {date} {time} 做 InBody 量測～\n地點係：中環士丹利街50號 信誠廣場21樓C室\n\n因個資問題，如果有需要拍攝量測過程，儘量避免影到合作中心 logo、工作人員就 OK 啦！☺️\n做完量測之後，麻煩用 App 裡面嘅「AI inbody」功能影低，咁營養師就可以睇到你嘅報告啦！😃",
-            script: "提提 {name}，{date} 需要麻煩你提供初版腳本 (video flow) 啦！辛苦晒～",
-            acopy: "提提你，{date} 要麻煩你提供 A copy (連字幕)～ 辛苦晒你！",
-            bcopy: "提提你，{date} 要麻煩你提供 B copy ，唔該晒你～ 辛苦晒！",
+            measure: "Hello {name}，我幫你約咗 {date} {time} 做 InBody 量測～\n地點係：{address}\n\n因個資問題，如果有需要拍攝量測過程，儘量避免影到合作中心 logo、工作人員就 OK 啦！☺️\n做完量測之後，麻煩用 App 裡面嘅「AI inbody」功能影低，咁營養師就可以睇到你嘅報告啦！😃",
+            script: "提提 {name}，{date} 需要交出版嘅腳本 (video flow) 喇！辛苦晒～",
+            acopy: "提醒你，{date} 要麻煩你交 A copy (連字幕) 喇！辛苦晒你！",
+            bcopy: "提醒你，{date} 要麻煩你交 B copy 喇！唔該晒你，辛苦晒！",
             final: "喺影片上線之前，麻煩 {name} 喺 {date} 比我哋睇多次個 Final version 呀！唔該晒！",
             ig: "請問 {name} 嘅 IG Story 準備好未呀？發布之前麻煩比我哋睇睇先～唔該！"
         },
@@ -139,7 +161,7 @@
             survey: "Hello {name}, before your consultation with the nutritionist, kindly complete the following two questionnaires 🙏\n\n⚠️ Important: Please make sure to fill them out using the same mobile phone number you used to register in the app, so the nutritionist can locate your questionnaires. ⚠️\n\n1️⃣ Health questionnaire: https://client.cofit.me/en/survey?next=surveyForm&surveyCode=vjwrif45YyPyoQGaK63G1wqE \n2️⃣ Hormone Type Questionnaire: https://client.cofit.me/en/survey?next=surveyForm&surveyCode=2i4Sg8UQW6kgmeZ2Sn1izyFc\n\nIf you have any questions, don’t hesitate to contact us! 😊",
             "1v1": "Hello {name}, this is a reminder for your 1-on-1 consultation with nutritionist {dt} {date} at {time}. You can join via 👉 Google meet: {link} 💖",
             video: "Hello {name}, reminding you of your video guidance session with nutritionist {dt} {date} at {time}. Join here 👉 Google meet: {link} 💖",
-            measure: "Hi {name}, I've scheduled an InBody measurement for you {date} at {time}.\nLocation: Unit C, 21/F, Prosperous Building, 50 Stanley Street, Central.\n\nOnce finished, please upload the results using the 'AI InBody' feature in the app! 😃",
+            measure: "Hi {name}, I've scheduled an InBody measurement for you {date} at {time}.\nLocation: {address}\n\nOnce finished, please upload the results using the 'AI InBody' feature in the app! 😃",
             script: "Hi {name}, just a friendly reminder that the script is due {date}. Thank you!",
             acopy: "Hi {name}, the A copy (with subtitles) is due {date}. Thank you!",
             bcopy: "Hi {name}, the B copy is due {date}. Thank you!",
@@ -164,11 +186,13 @@
         const fTime = document.getElementById('field-time');
         const fDt = document.getElementById('field-dietitian');
         const fLink = document.getElementById('field-link');
+        const locGroup = document.getElementById('locationGroup');
 
         extra.style.display = "block";
         fTime.style.display = "none";
         fDt.style.display = "none";
         fLink.style.display = "none";
+        locGroup.style.display = "none"; 
 
         if (sc === '1v1' || sc === 'video') {
             fTime.style.display = "block";
@@ -176,6 +200,7 @@
             fLink.style.display = "block";
         } else if (sc === 'measure') {
             fTime.style.display = "block";
+            locGroup.style.display = "block"; 
         } else if (['class_start', 'payment_proof', 'survey', 'acopy', 'bcopy', 'final', 'ig', 'script'].includes(sc)) {
             if (sc !== '1v1' && sc !== 'video' && sc !== 'measure') extra.style.display = "none";
         }
@@ -226,7 +251,10 @@
         const time = document.getElementById('timeOnly').value || "[時間]";
         const dt = document.getElementById('dietitian').value || "[營養師]";
         const link = document.getElementById('meetLink').value || "[連結]";
+        const locKey = document.getElementById('measureLocation').value;
         const dateStr = getDateString();
+
+        const addressStr = addressMap[locKey][lang];
 
         let text = templates[lang][sc];
         
@@ -234,7 +262,8 @@
                    .split('{date}').join(dateStr)
                    .split('{time}').join(time)
                    .split('{dt}').join(dt)
-                   .split('{link}').join(link);
+                   .split('{link}').join(link)
+                   .split('{address}').join(addressStr); 
 
         document.getElementById('resultText').value = text;
     }
